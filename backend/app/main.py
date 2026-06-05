@@ -38,20 +38,14 @@ app = FastAPI(
 )
 
 # Configure CORS to allow frontend origin
-origins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
-
-# Accept additional origins if specified in environment
-env_origins = os.getenv("ALLOWED_ORIGINS")
-if env_origins:
-    origins.extend([o.strip() for o in env_origins.split(",")])
+# In Vercel multi-service deployments, both frontend and backend share the same domain.
+# Requests come from the same origin via the /_/backend route prefix, so wildcard is safe here.
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=True,
+    allow_credentials=False,   # Must be False when allow_origins=["*"]
     allow_methods=["*"],
     allow_headers=["*"],
 )
