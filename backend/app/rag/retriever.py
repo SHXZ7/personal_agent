@@ -1,7 +1,6 @@
 import os
 from dotenv import load_dotenv
 from qdrant_client import QdrantClient
-from qdrant_client.models import Filter, FieldCondition, MatchValue
 from app.rag.embeddings import embed
 
 load_dotenv()
@@ -81,56 +80,30 @@ def retrieve(query: str, top_k: int = 5):
     }
     has_commit_keyword = any(kw in query_words for kw in commit_keywords) or "pull request" in query_lower
     
-    # 1. Fetch documentation chunks (READMEs and Resumes)
-    doc_filter = Filter(
-        must_not=[
-            FieldCondition(key="type", match=MatchValue(value="commit"))
-        ]
-    )
-    doc_results = client.query_points(
+    # Fetch a wider unfiltered pool and split by payload locally. Some managed
+    # Qdrant setups require payload indexes for filtered queries.
+    search_results = client.query_points(
         collection_name=collection_name,
         query=vector,
-        query_filter=doc_filter,
-        limit=top_k
-    )
-    
-    # 2. Fetch commit chunks
-    commit_filter = Filter(
-        must=[
-            FieldCondition(key="type", match=MatchValue(value="commit"))
-        ]
-    )
-    commit_results = client.query_points(
-        collection_name=collection_name,
-        query=vector,
-        query_filter=commit_filter,
-        limit=top_k
+        limit=max(top_k * 4, 20)
     )
     
     # Format the results
     doc_chunks = []
-    for point in doc_results.points:
+    for point in search_results.points:
         payload = point.payload or {}
         text = payload.get("text", "")
         # Filter out "text" key to keep only metadata
         metadata = {k: v for k, v in payload.items() if k != "text"}
-        doc_chunks.append({
+        chunk = {
             "text": text,
             "metadata": metadata,
             "score": point.score
-        })
-        
-    commit_chunks = []
-    for point in commit_results.points:
-        payload = point.payload or {}
-        text = payload.get("text", "")
-        # Filter out "text" key to keep only metadata
-        metadata = {k: v for k, v in payload.items() if k != "text"}
-        commit_chunks.append({
-            "text": text,
-            "metadata": metadata,
-            "score": point.score
-        })
+        }
+        if payload.get("type") == "commit":
+            commit_chunks.append(chunk)
+        else:
+            doc_chunks.append(chunk)
         
     # Sort and combine based on intent
     if has_commit_keyword:
