@@ -1,0 +1,9 @@
+# Dependencies for local development and database ingestion
+-r requirements.txt
+langchain
+langchain-community
+langchain-text-splitters
+langchain-qdrant
+sentence-transformers
+pypdf
+gitpython
