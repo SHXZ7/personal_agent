@@ -90,6 +90,7 @@ def retrieve(query: str, top_k: int = 5):
     
     # Format the results
     doc_chunks = []
+    commit_chunks = []
     for point in search_results.points:
         payload = point.payload or {}
         text = payload.get("text", "")
