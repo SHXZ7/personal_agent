@@ -54,23 +54,31 @@ graph TD
 
     %% Routing
     User -->|Speak / Chat| UI
-    UI <-->|Local Audio| STT & TTS
-    Voice <-->|Interrupt Signals| TTS
     
-    UI <-->|POST /chat| Router
-    UI <-->|GET /available-slots| Router
-    UI <-->|POST /book| Router
+    UI -->|Audio Input| STT
+    STT -->|Text Tokens| UI
+    UI -->|Speech Request| TTS
+    TTS -->|Audio Output| UI
+    
+    Voice -->|Interrupt Signals| TTS
+    
+    UI -->|API Requests| Router
+    Router -->|JSON Responses| UI
 
-    Router <-->|History Turns| Memory
-    Memory -->|LLM Rephrase| Groq
+    Router -->|Conversation History| Memory
+    Memory -->|Condensed Context| Router
+    Memory -->|Rephrase Query| Groq
     
-    Router <-->|Semantic Retrieve| RagTool
+    Router -->|RAG Inquiry| RagTool
+    RagTool -->|Retrieve Docs| Router
     RagTool -->|Encode Query| Embed
-    Embed -->|Dense Matching| Qdrant
-    RagTool -->|Context Synthesis| Groq
+    Embed -->|Dense Search| Qdrant
+    RagTool -->|Synthesize Answer| Groq
     
-    Router <-->|Schedule / FreeBusy| CalTool
-    CalTool <-->|OAuth Insert / Fetch| GCal
+    Router -->|Calendar Sync| CalTool
+    CalTool -->|Available Slots / Book| Router
+    CalTool -->|Fetch / Write Events| GCal
+    GCal -->|FreeBusy / Confirmation| CalTool
 ```
 
 ---

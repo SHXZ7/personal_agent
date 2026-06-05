@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+:root {
+  /* Color System — layered depth */
+  --bg-base:      #080810;   /* true near-black with blue tint */
+  --bg-surface:   #0f0f1a;   /* card surfaces */
+  --bg-elevated:  #16162a;   /* hover states, modals */
+  --bg-border:    rgba(255, 255, 255, 0.07);
+
+  /* Text */
+  --text-primary:   #f0f0ff;
+  --text-secondary: rgba(240, 240, 255, 0.55);
+  --text-muted:     rgba(240, 240, 255, 0.28);
+
+  /* Accent */
+  --accent:         #6366F1;   /* electric indigo */
+  --accent-dim:     rgba(99, 102, 241, 0.15);
+  --accent-glow:    rgba(99, 102, 241, 0.35);
+
+  /* Semantic */
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --error:   #ef4444;
+
+  /* Borders */
+  --border:       rgba(255, 255, 255, 0.07);
+  --border-hover: rgba(255, 255, 255, 0.14);
+}
+
+@theme inline {
+  --color-bg-base: var(--bg-base);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-accent: var(--accent);
+  --color-accent-dim: var(--accent-dim);
+  --color-accent-glow: var(--accent-glow);
+  --color-border: var(--border);
+  --color-border-hover: var(--border-hover);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  
+  --font-sans: var(--font-geist-sans), sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
+  --font-display: var(--font-display), Georgia, serif;
+}
+
+body {
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-geist-sans), sans-serif;
+}
+
+/* Animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+  50%       { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+}
+
+@keyframes wave {
+  0%, 60%, 100% { transform: translateY(0); }
+  30%            { transform: translateY(-6px); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeUp {
+  animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-pulse-glow {
+  animation: pulse 2s infinite;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-dot-wave {
+  animation: wave 1.2s infinite ease-in-out;
+}
+
+/* Stagger Animations */
+.stagger-1 { animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; }
+.stagger-2 { animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both; }
+.stagger-3 { animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both; }
+.stagger-4 { animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both; }
+
+/* Voice Bubble Animations */
+@keyframes voiceRing {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+.animate-voice-ring {
+  animation: voiceRing 2s infinite cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes voicePulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+  50% { transform: scale(1.03); box-shadow: 0 0 25px 4px rgba(99, 102, 241, 0.2); }
+}
+
+.animate-voice-pulse {
+  animation: voicePulse 2s infinite ease-in-out;
+}
