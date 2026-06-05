@@ -57,11 +57,46 @@ def read_root():
         "status": "online"
     }
 
+@app.get("/debug")
+def debug_endpoint():
+    """Temporary debug endpoint to diagnose backend startup and env issues."""
+    import sys
+    import traceback
+    results = {
+        "python_version": sys.version,
+        "sys_path": sys.path[:5],
+        "env_vars": {
+            "GROQ_API_KEY": "set" if os.getenv("GROQ_API_KEY") else "MISSING",
+            "QDRANT_URL": os.getenv("QDRANT_URL", "MISSING"),
+            "QDRANT_API_KEY": "set" if os.getenv("QDRANT_API_KEY") else "MISSING",
+            "HF_TOKEN": "set" if os.getenv("HF_TOKEN") else "MISSING",
+        },
+        "import_tests": {}
+    }
+    for mod_name, mod_import in [
+        ("groq", "from groq import Groq"),
+        ("qdrant_client", "from qdrant_client import QdrantClient"),
+        ("app.agents", "from app.agents import generate_response_with_sources"),
+        ("app.rag", "from app.rag import retrieve"),
+        ("app.calendar", "from app.calendar import get_available_slots"),
+    ]:
+        try:
+            exec(mod_import)
+            results["import_tests"][mod_name] = "OK"
+        except Exception as e:
+            results["import_tests"][mod_name] = f"ERROR: {type(e).__name__}: {str(e)}"
+    return results
+
 @app.post("/chat", response_model=ChatResponse)
 def chat_endpoint(request: ChatRequest):
-    history_dicts = [{"role": msg.role, "text": msg.text} for msg in request.history]
-    res = generate_response_with_sources(request.message, history=history_dicts, voice=request.voice)
-    return ChatResponse(answer=res["answer"], sources=res["sources"])
+    try:
+        history_dicts = [{"role": msg.role, "text": msg.text} for msg in request.history]
+        res = generate_response_with_sources(request.message, history=history_dicts, voice=request.voice)
+        return ChatResponse(answer=res["answer"], sources=res["sources"])
+    except Exception as e:
+        import traceback
+        err = f"[Backend Error] {type(e).__name__}: {str(e)}\n\n{traceback.format_exc()}"
+        return ChatResponse(answer=err, sources=["debug"])
 
 @app.get("/available-slots")
 def get_available_slots_endpoint():
