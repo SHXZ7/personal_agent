@@ -5,6 +5,7 @@ import PageWrapper from "../../components/layout/PageWrapper";
 import CalendarPicker from "../../components/booking/CalendarPicker";
 import SlotCard from "../../components/booking/SlotCard";
 import ConfirmModal from "../../components/booking/ConfirmModal";
+import { getApiUrl } from "../../utils/api";
 
 const WEEKDAY_NAMES = [
   "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
@@ -41,7 +42,7 @@ export default function BookPage() {
   useEffect(() => {
     async function fetchSlots() {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const apiUrl = getApiUrl();
         const response = await fetch(`${apiUrl}/available-slots`);
         if (!response.ok) throw new Error("Failed to fetch slots");
         const data = await response.json();
@@ -98,7 +99,7 @@ export default function BookPage() {
     }
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const apiUrl = getApiUrl();
       const response = await fetch(`${apiUrl}/book`, {
         method: "POST",
         headers: {

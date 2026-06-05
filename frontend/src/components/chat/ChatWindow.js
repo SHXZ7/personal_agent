@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import MessageBubble from "./MessageBubble";
 import InputBar from "./InputBar";
 import TypingIndicator from "./TypingIndicator";
+import { getApiUrl } from "../../utils/api";
 
 export default function ChatWindow({ triggerQuery, clearTriggerQuery }) {
   const [messages, setMessages] = useState([
@@ -43,7 +44,7 @@ export default function ChatWindow({ triggerQuery, clearTriggerQuery }) {
         clearTriggerQuery();
 
         try {
-          const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+          const apiUrl = getApiUrl();
           const response = await fetch(`${apiUrl}/chat`, {
             method: "POST",
             headers: {
@@ -102,7 +103,7 @@ export default function ChatWindow({ triggerQuery, clearTriggerQuery }) {
     setIsLoading(true);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const apiUrl = getApiUrl();
       const response = await fetch(`${apiUrl}/chat`, {
         method: "POST",
         headers: {

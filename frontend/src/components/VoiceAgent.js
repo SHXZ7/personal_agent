@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Button from "./ui/Button";
+import { getApiUrl } from "../utils/api";
 
 export default function VoiceAgent() {
   const [isListening, setIsListening] = useState(false);
@@ -156,7 +157,7 @@ export default function VoiceAgent() {
     setHistory(prev => [...prev, { role: "user", text: queryText }]);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      const apiUrl = getApiUrl();
       const response = await fetch(`${apiUrl}/chat`, {
         method: "POST",
         headers: {

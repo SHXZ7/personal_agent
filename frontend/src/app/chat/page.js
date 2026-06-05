@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import PageWrapper from "../../components/layout/PageWrapper";
 import ChatWindow from "../../components/chat/ChatWindow";
+import { getApiUrl } from "../../utils/api";
 import SkillsGrid from "../../components/persona/SkillsGrid";
 import ProjectCard from "../../components/persona/ProjectCard";
 import GlowDot from "../../components/ui/GlowDot";
@@ -23,7 +24,7 @@ export default function ChatPage() {
   useEffect(() => {
     async function fetchProjects() {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+        const apiUrl = getApiUrl();
         const res = await fetch(`${apiUrl}/projects`);
         if (!res.ok) throw new Error("Backend response error");
         const data = await res.json();
