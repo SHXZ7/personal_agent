@@ -30,46 +30,78 @@ def get_calendar_service():
         return None
         
     creds = None
-    # token.json stores user's access and refresh tokens, created automatically after first authorization
-    if os.path.exists(TOKEN_PATH):
+    import json
+    
+    # 1. Try loading user credentials token from environment variable (preferred for production/Vercel)
+    google_token_json = os.environ.get("GOOGLE_TOKEN_JSON")
+    if google_token_json:
+        try:
+            info = json.loads(google_token_json)
+            creds = Credentials.from_authorized_user_info(info, ["https://www.googleapis.com/auth/calendar"])
+            logger.info("Loaded Google Calendar credentials from GOOGLE_TOKEN_JSON environment variable.")
+        except Exception as e:
+            logger.error(f"Error loading credentials from GOOGLE_TOKEN_JSON env var: {e}")
+
+    # Fallback to local token.json file
+    if not creds and os.path.exists(TOKEN_PATH):
         try:
             creds = Credentials.from_authorized_user_file(TOKEN_PATH, ["https://www.googleapis.com/auth/calendar"])
+            logger.info("Loaded Google Calendar credentials from token.json file.")
         except Exception as e:
             logger.error(f"Error loading token.json: {e}")
 
-    # If there are no valid credentials available, let the user log in.
+    # If there are no valid credentials available, refresh or start flow
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             try:
                 creds.refresh(Request())
+                # Try saving refreshed credentials to local token.json if writable
+                if not google_token_json:
+                    try:
+                        with open(TOKEN_PATH, "w") as token:
+                            token.write(creds.to_json())
+                    except Exception as e:
+                        logger.warning(f"Could not save refreshed token to disk (typical on serverless): {e}")
             except Exception as e:
                 logger.error(f"Error refreshing access token: {e}")
                 creds = None
         else:
-            if not os.path.exists(CREDENTIALS_PATH):
+            # Load Client Secrets Configuration
+            google_creds_json = os.environ.get("GOOGLE_CREDENTIALS_JSON")
+            
+            if not google_creds_json and not os.path.exists(CREDENTIALS_PATH):
                 logger.warning(
-                    f"Google Calendar credentials.json not found at {CREDENTIALS_PATH}. "
-                    "Calendar tool will run in mock fallback mode. "
-                    "To use real Google Calendar, download OAuth credentials.json from Google Cloud Console."
+                    f"Google Calendar credentials.json not found at {CREDENTIALS_PATH} and GOOGLE_CREDENTIALS_JSON env var is missing. "
+                    "Calendar tool will run in mock fallback mode."
                 )
                 return None
 
             try:
-                flow = InstalledAppFlow.from_client_secrets_file(
-                    CREDENTIALS_PATH,
-                    ["https://www.googleapis.com/auth/calendar"]
-                )
+                if google_creds_json:
+                    client_config = json.loads(google_creds_json)
+                    flow = InstalledAppFlow.from_client_config(
+                        client_config,
+                        ["https://www.googleapis.com/auth/calendar"]
+                    )
+                else:
+                    flow = InstalledAppFlow.from_client_secrets_file(
+                        CREDENTIALS_PATH,
+                        ["https://www.googleapis.com/auth/calendar"]
+                    )
+                
+                # run_local_server will fail in serverless/headless environments
                 creds = flow.run_local_server(port=0)
             except Exception as e:
-                logger.error(f"Error authenticating with credentials.json: {e}")
+                logger.error(f"Error running Google OAuth flow: {e}. Note: interactive auth cannot run in headless/serverless deployments.")
                 return None
 
-        # Save the credentials for the next run
-        try:
-            with open(TOKEN_PATH, "w") as token:
-                token.write(creds.to_json())
-        except Exception as e:
-            logger.error(f"Error saving token.json: {e}")
+        # Save the credentials for the next run if we successfully ran the flow
+        if creds and not google_token_json:
+            try:
+                with open(TOKEN_PATH, "w") as token:
+                    token.write(creds.to_json())
+            except Exception as e:
+                logger.warning(f"Error saving token.json: {e}")
 
     if creds:
         try:
