@@ -49,7 +49,22 @@ def retrieve(query: str, top_k: int = 5):
         return []
         
     # Generate embedding for the query
-    query_vectors = embed([query])
+    try:
+        query_vectors = embed([query])
+    except Exception as e:
+        print(f"Embedding generation failed. Returning indexed summary only: {e}")
+        repos, resumes = get_all_repositories(client, collection_name)
+        if not repos and not resumes:
+            return []
+        return [{
+            "text": (
+                f"Here is a summary of all items indexed in the database:\n"
+                f"- Repositories/Projects: {', '.join(repos)}\n"
+                f"- Resume Files: {', '.join(resumes)}"
+            ),
+            "metadata": {"source": "summary", "type": "system_summary"},
+            "score": 1.0
+        }]
     query_vector = query_vectors[0]
     
     # Convert numpy array to list if needed
