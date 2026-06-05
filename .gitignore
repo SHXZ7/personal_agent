@@ -1,0 +1,27 @@
+# Sensitive Configuration Files
+backend/credentials.json
+backend/token.json
+backend/.env
+frontend/.env*
+
+# Node.js dependencies & builds
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+
+# Python compiled files & environments
+backend/__pycache__/
+backend/*.py[cod]
+backend/*.so
+backend/.venv/
+backend/env/
+backend/venv/
+backend/ENV/
+
+# System / IDE files
+.vscode/
+.idea/
+*.log
+.DS_Store
+Thumbs.db
