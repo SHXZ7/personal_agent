@@ -26,30 +26,30 @@ graph TD
     classDef external fill:#1f2937,stroke:#F59E0B,stroke-width:2px,color:#fff;
 
     %% Nodes
-    User([User])
+    User(["User"])
     
-    subgraph Frontend [Next.js Web App]
-        UI[Chat / Book UI]:::client
-        Voice[Circular Voice Agent]:::client
-        STT[Web Speech STT]:::client
-        TTS[Web Speech TTS]:::client
+    subgraph Frontend ["Next.js Web App"]
+        UI["Chat / Book UI"]:::client
+        Voice["Circular Voice Agent"]:::client
+        STT["Web Speech STT"]:::client
+        TTS["Web Speech TTS"]:::client
     end
 
-    subgraph Backend [FastAPI Server]
-        Router[Intent Router]:::api
-        Memory[Query Condensation]:::api
-        RagTool[RAG Search Agent]:::api
-        CalTool[Calendar Agent]:::api
+    subgraph Backend ["FastAPI Server"]
+        Router["Intent Router"]:::api
+        Memory["Query Condensation"]:::api
+        RagTool["RAG Search Agent"]:::api
+        CalTool["Calendar Agent"]:::api
     end
 
-    subgraph Database [Vector DB]
-        Qdrant[(Qdrant DB)]:::data
-        Embed[SentenceTransformers]:::data
+    subgraph Database ["Vector DB"]
+        Qdrant[("Qdrant DB")]:::data
+        Embed["SentenceTransformers"]:::data
     end
 
-    subgraph ThirdParty [Third-Party Services]
-        Groq[[Groq API]]:::external
-        GCal[[Google Calendar API]]:::external
+    subgraph ThirdParty ["Third-Party Services"]
+        Groq["Groq API"]:::external
+        GCal["Google Calendar API"]:::external
     end
 
     %% Routing
